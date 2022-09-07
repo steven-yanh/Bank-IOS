@@ -103,7 +103,6 @@ extension LoginViewController {
 extension LoginViewController {
     @objc func signInTapped() {
         login()
-        
     }
     private func login() {
         guard let username = username, let password = password else {
