@@ -17,20 +17,29 @@ class OnboardingViewController: UIViewController {
         style()
         layout()
     }
+    init (heroImageName: String, titleText: String) {
+        self.imageView.image = UIImage(named: heroImageName)
+        self.label.text = titleText
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 extension OnboardingViewController {
     func style() {
+        
+        
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 20
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(named: "delorean")
         
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Bankey is faster, easier to use, and has brand new look and feel that will make you feel like you are back in the 1989"
         label.font = UIFont.preferredFont(forTextStyle: .title3)
         label.textAlignment = .center
         label.numberOfLines = 0
