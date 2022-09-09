@@ -7,14 +7,22 @@
 
 import UIKit
 
+protocol OnboardingContainerViewControllerDelegate: AnyObject {
+    func didFinishOnboarding(_ sender: OnboardingContainerViewController)
+}
+
 class OnboardingContainerViewController: UIViewController {
 
     let pageViewController: UIPageViewController
     var pages = [UIViewController]()
-    var currentVC: UIViewController {
-        didSet {
-        }
-    }
+    var currentVC: UIViewController
+    
+    let skipButton = UIButton(type: .system)
+    let doneButton = UIButton(type: .system)
+    
+    var index = 0
+    
+    weak var delegate: OnboardingContainerViewControllerDelegate?
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         self.pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
@@ -38,10 +46,16 @@ class OnboardingContainerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
+        style()
+        layout()
         
+    }
+    
+    private func setup() {
         view.backgroundColor = .systemCyan
         
-        // three line to add child UIViewController to hook up with parent UIViewController
+        // these three lines to add child UIViewController to hook up with parent UIViewController
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
         pageViewController.didMove(toParent: self)
@@ -59,6 +73,33 @@ class OnboardingContainerViewController: UIViewController {
         pageViewController.setViewControllers([pages.first!], direction: .forward, animated: false, completion: nil)
         currentVC = pages.first!
     }
+    private func style() {
+        skipButton.setTitle("skip", for: [])
+        skipButton.addTarget(self, action: #selector(closeTapped), for: .primaryActionTriggered)
+        
+        doneButton.setTitle("done", for: [])
+        doneButton.addTarget(self, action: #selector(doneTapped), for: .primaryActionTriggered)
+        doneButton.isHidden = true
+        
+    }
+    private func layout() {
+        view.addSubview(skipButton)
+        view.addSubview(doneButton)
+
+        skipButton.translatesAutoresizingMaskIntoConstraints = false
+        doneButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        //close
+        NSLayoutConstraint.activate([
+            skipButton.leadingAnchor.constraint(equalToSystemSpacingAfter: view.leadingAnchor, multiplier: 3),
+            skipButton.topAnchor.constraint(equalToSystemSpacingBelow: view.safeAreaLayoutGuide.topAnchor, multiplier: 2)
+        ])
+        //done
+        NSLayoutConstraint.activate([
+            view.trailingAnchor.constraint(equalToSystemSpacingAfter: doneButton.trailingAnchor, multiplier: 3),
+            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalToSystemSpacingBelow: doneButton.bottomAnchor, multiplier: 4)
+        ])
+    }
 }
 
 // MARK: - UIPageViewControllerDataSource
@@ -69,6 +110,12 @@ extension OnboardingContainerViewController: UIPageViewControllerDataSource {
     }
 
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        if let index = pages.firstIndex(of: viewController) {
+            if index == 1 {
+                doneButton.isHidden = false
+            }
+        }
+    
         return getNextViewController(from: viewController)
     }
 
@@ -92,6 +139,36 @@ extension OnboardingContainerViewController: UIPageViewControllerDataSource {
         return pages.firstIndex(of: self.currentVC) ?? 0
     }
 }
+
+//MARK: - Actions
+extension OnboardingContainerViewController {
+    @objc private func closeTapped(_ sender: UIButton) {
+        delegate?.didFinishOnboarding(self)
+    }
+    @objc private func doneTapped(_ sender: UIButton) {
+        delegate?.didFinishOnboarding(self)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // MARK: - ViewControllers
 //class ViewController1: UIViewController {

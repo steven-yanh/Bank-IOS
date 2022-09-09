@@ -12,12 +12,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
     
+    let loginViewController = LoginViewController()
+    
+    let OnboardingViewController = OnboardingContainerViewController()
+    
+    let dummy = DummyVC()
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey:Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         window? .makeKeyAndVisible()
         window?.backgroundColor = .systemBackground
-//        window?.rootViewController = LoginViewController()
-        window?.rootViewController = OnboardingContainerViewController()
+        loginViewController.delegate = self
+        OnboardingViewController.delegate = self
+        dummy.delegate = self
+        
+        window?.rootViewController = loginViewController
+        
+//        window?.rootViewController = OnboardingViewController
 //        window?.rootViewController = OnboardingViewController(heroImageName: "delorean", titleText: "Bankey is faster, easier to use, and has brand new look and feel that will make you feel like you are back in the 1989")
         return true
     }
@@ -25,4 +35,46 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 
 }
+//MARK: - Login Delegate
+extension AppDelegate: LoginViewControllerDelegate {
+    func didLogin(_ sender: LoginViewController) {
+        let hasBoarded = LocalState.hasOnboarded
+        if hasBoarded {
+            setRootVC(dummy)
+        }else {
+            setRootVC(OnboardingViewController)
+        }
+    }
+}
 
+//MARK: - Onboarding Delegate
+extension AppDelegate: OnboardingContainerViewControllerDelegate {
+    func didFinishOnboarding(_ sender: OnboardingContainerViewController) {
+        LocalState.hasOnboarded = true
+        setRootVC(dummy)
+    }
+}
+
+//MARK: - Logout Delegate
+extension AppDelegate: logoutDelegate {
+    func didLogout() {
+        setRootVC(loginViewController)
+        
+    }
+}
+
+
+
+//MARK: - Animation transition between VC
+extension AppDelegate {
+    func setRootVC (_ vc: UIViewController, animated: Bool = true) {
+        guard animated, let window = self.window else {
+            self.window?.rootViewController = vc
+            self.window?.makeKeyAndVisible()
+            return
+        }
+        window.rootViewController = vc
+        window.makeKeyAndVisible()
+        UIView.transition(with: window, duration: 0.7, options: .transitionCrossDissolve, animations: nil, completion: nil)
+    }
+}
