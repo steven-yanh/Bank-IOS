@@ -7,6 +7,8 @@
 
 import UIKit
 
+let appColor = UIColor.systemTeal
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
@@ -16,19 +18,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let OnboardingViewController = OnboardingContainerViewController()
     
-    let dummy = DummyVC()
+    let mainViewController = MainViewController()
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey:Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         window? .makeKeyAndVisible()
         window?.backgroundColor = .systemBackground
         loginViewController.delegate = self
         OnboardingViewController.delegate = self
-        dummy.delegate = self
-        
-        window?.rootViewController = loginViewController
-        
+//        window?.rootViewController = loginViewController
 //        window?.rootViewController = OnboardingViewController
-//        window?.rootViewController = OnboardingViewController(heroImageName: "delorean", titleText: "Bankey is faster, easier to use, and has brand new look and feel that will make you feel like you are back in the 1989")
+        window?.rootViewController = mainViewController
         return true
     }
     
@@ -40,7 +40,7 @@ extension AppDelegate: LoginViewControllerDelegate {
     func didLogin(_ sender: LoginViewController) {
         let hasBoarded = LocalState.hasOnboarded
         if hasBoarded {
-            setRootVC(dummy)
+            setRootVC(mainViewController)
         }else {
             setRootVC(OnboardingViewController)
         }
@@ -51,7 +51,7 @@ extension AppDelegate: LoginViewControllerDelegate {
 extension AppDelegate: OnboardingContainerViewControllerDelegate {
     func didFinishOnboarding(_ sender: OnboardingContainerViewController) {
         LocalState.hasOnboarded = true
-        setRootVC(dummy)
+        setRootVC(mainViewController)
     }
 }
 
