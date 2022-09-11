@@ -36,7 +36,9 @@ class LoginViewController: UIViewController {
         super.viewDidLoad()
         style()
         layout()
-        
+        //MARK: - To Be Deleted
+        loginView.usernameTextField.text = "A"
+        loginView.passwordTextField.text = "b"
     }
     override func viewDidDisappear(_ animated: Bool) {
         signInbotton.configuration?.showsActivityIndicator = false
