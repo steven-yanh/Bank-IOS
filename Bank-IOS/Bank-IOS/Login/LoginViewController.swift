@@ -32,6 +32,15 @@ class LoginViewController: UIViewController {
         return loginView.passwordTextField.text
     }
     
+    var leadingEdgeOnScreen:CGFloat = 16
+    var leadingEdgeOffScreen:CGFloat = -1000
+    
+    var titleLeadingAnchor: NSLayoutConstraint? //set the constrain as variable so we can animate it
+    var titleTopAnchor: NSLayoutConstraint?
+    var topAnchorOffDescript: CGFloat = 16
+    var topAnchorOnDescript: CGFloat = 32
+    var descriptLeadingAnchor: NSLayoutConstraint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         style()
@@ -39,6 +48,10 @@ class LoginViewController: UIViewController {
         //MARK: - To Be Deleted
         loginView.usernameTextField.text = "A"
         loginView.passwordTextField.text = "b"
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        animate()
     }
     override func viewDidDisappear(_ animated: Bool) {
         signInbotton.configuration?.showsActivityIndicator = false
@@ -50,21 +63,20 @@ class LoginViewController: UIViewController {
 }
 
 extension LoginViewController {
-    private func style() {
+    private func style() {        bankeyLabel.translatesAutoresizingMaskIntoConstraints = false
+        bankeyLabel.text = "Bankey"
+        bankeyLabel.font = .boldSystemFont(ofSize: 60)
+        bankeyLabel.alpha = 0
+        
+        descriptLabel.translatesAutoresizingMaskIntoConstraints = false
+        descriptLabel.text = "Your premium source for all things banking"
+        descriptLabel.numberOfLines = 0
+        descriptLabel.alpha = 0
         
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.spacing = 16
         stackView.axis = .vertical
         loginView.translatesAutoresizingMaskIntoConstraints = false
-        
-        bankeyLabel.translatesAutoresizingMaskIntoConstraints = false
-        bankeyLabel.text = "Bankey"
-        bankeyLabel.font = .boldSystemFont(ofSize: 60)
-        
-        
-        descriptLabel.translatesAutoresizingMaskIntoConstraints = false
-        descriptLabel.text = "Your premium source for all things banking"
-        descriptLabel.numberOfLines = 0
         
         signInbotton.translatesAutoresizingMaskIntoConstraints = false
         signInbotton.configuration = .filled()
@@ -78,8 +90,8 @@ extension LoginViewController {
         errorMessageLabel.numberOfLines = 0
     }
     private func layout() {
-        stackView.addSubview(bankeyLabel)
-        stackView.addSubview(descriptLabel)
+        view.addSubview(bankeyLabel)
+        view.addSubview(descriptLabel)
         view.addSubview(stackView)
         view.addSubview(errorMessageLabel)
         stackView.addArrangedSubview(loginView)
@@ -98,19 +110,24 @@ extension LoginViewController {
             errorMessageLabel.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
             errorMessageLabel.trailingAnchor.constraint(equalTo: stackView.trailingAnchor)
         ])
+        //BankeyLabel
         NSLayoutConstraint.activate([
-            bankeyLabel.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
-            bankeyLabel.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
-            descriptLabel.topAnchor.constraint(equalToSystemSpacingBelow: bankeyLabel.bottomAnchor, multiplier: 4),
+            bankeyLabel.trailingAnchor.constraint(equalTo: stackView.trailingAnchor)
+//            descriptLabel.topAnchor.constraint(equalToSystemSpacingBelow: bankeyLabel.bottomAnchor, multiplier: 4),
             
         ])
+        titleTopAnchor = descriptLabel.topAnchor.constraint(equalTo: bankeyLabel.bottomAnchor, constant: topAnchorOffDescript)
+        titleTopAnchor?.isActive = true
+        titleLeadingAnchor = bankeyLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: leadingEdgeOffScreen)
+        titleLeadingAnchor?.isActive = true
         bankeyLabel.textAlignment = .center
         NSLayoutConstraint.activate([
-
-            descriptLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: stackView.leadingAnchor, multiplier: 3 ),
+//            descriptLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: stackView.leadingAnchor, multiplier: 3 ),
             stackView.trailingAnchor.constraint(equalToSystemSpacingAfter: descriptLabel.trailingAnchor, multiplier: 3),
-            stackView.topAnchor.constraint(equalToSystemSpacingBelow: descriptLabel.bottomAnchor, multiplier: 2)
+            stackView.topAnchor.constraint(equalToSystemSpacingBelow: descriptLabel.bottomAnchor, multiplier: 4)
         ])
+        descriptLeadingAnchor = descriptLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: leadingEdgeOffScreen)
+        descriptLeadingAnchor?.isActive = true
         descriptLabel.textAlignment = .center
     }
 }
@@ -144,5 +161,28 @@ extension LoginViewController {
     }
 }
 
-
+//MARK: - Animations
+extension LoginViewController {
+    private func animate() {
+        let duration = 1.0
+    
+        let animator1 = UIViewPropertyAnimator(duration: duration, curve: .easeInOut) {
+            self.titleLeadingAnchor?.constant = self.leadingEdgeOnScreen
+            self.view.layoutIfNeeded() //must add else it will not animate
+        }
+        animator1.startAnimation()
+        let animator2 = UIViewPropertyAnimator(duration: duration, curve: .easeInOut) {
+            self.descriptLeadingAnchor?.constant = self.leadingEdgeOnScreen
+            self.view.layoutIfNeeded()
+        }
+        animator2.startAnimation(afterDelay: duration/4)
+        let animator3 = UIViewPropertyAnimator(duration: duration*2, curve: .easeInOut) {
+            self.bankeyLabel.alpha = 1
+            self.descriptLabel.alpha = 1
+            self.titleTopAnchor?.constant = self.topAnchorOnDescript
+            self.view.layoutIfNeeded()
+        }
+        animator3.startAnimation()
+    }
+}
 
