@@ -27,14 +27,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         loginViewController.delegate = self
         onboardingViewController.delegate = self
         
+        registerFornotifications()
+        
 //        window?.rootViewController = loginViewController
         displayLogin() //Same?
         return true
     }
+    private func registerFornotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(didLogout), name: .logout, object: nil)
+    }
     private func displayLogin() {
         setRootVC(loginViewController)
     }
-    func displayNextScreen() {
+    private func displayNextScreen() {
         if LocalState.hasOnboarded {
             prepMainView()
             setRootVC(mainViewController)
@@ -68,7 +73,7 @@ extension AppDelegate: OnboardingContainerViewControllerDelegate {
 
 //MARK: - Logout Delegate
 extension AppDelegate: logoutDelegate {
-    func didLogout() {
+    @objc func didLogout() {
         setRootVC(loginViewController)
     }
 }
