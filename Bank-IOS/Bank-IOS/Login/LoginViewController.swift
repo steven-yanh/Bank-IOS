@@ -46,7 +46,7 @@ class LoginViewController: UIViewController {
         style()
         layout()
         //MARK: - To Be Deleted
-        loginView.usernameTextField.text = "A"
+//        loginView.usernameTextField.text = "A"
         loginView.passwordTextField.text = "b"
     }
     override func viewDidAppear(_ animated: Bool) {
@@ -158,6 +158,7 @@ extension LoginViewController {
     private func configureView(withMessage message: String) {
         errorMessageLabel.text = message
         errorMessageLabel.isHidden = false
+        shakeButton()
     }
 }
 
@@ -183,6 +184,16 @@ extension LoginViewController {
             self.view.layoutIfNeeded()
         }
         animator3.startAnimation()
+    }
+    private func shakeButton() {
+        let animator = CAKeyframeAnimation()
+        animator.keyPath = "position.x"
+        animator.values = [0,10,-10,10,0]
+        animator.keyTimes = [0, 0.16, 0.5, 0.83, 1]
+        animator.duration = 0.2
+        animator.isAdditive = true
+        
+        signInbotton.layer.add(animator, forKey: "shake")
     }
 }
 
