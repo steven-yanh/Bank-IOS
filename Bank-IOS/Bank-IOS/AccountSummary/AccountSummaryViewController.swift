@@ -10,7 +10,7 @@ import UIKit
 class AccountSummaryViewController: UIViewController {
     
     var tableView = UITableView()
-    var accounts: [AccountSummaryCell.ViewModel] = []
+    var accounts = [AccountSummaryCellViewModel]()
     
     var logoutBarButtonItem: UIBarButtonItem {
         let barButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logoutTapped))
@@ -65,22 +65,22 @@ extension AccountSummaryViewController {
         tableView.tableHeaderView = header
     }
     private func fetchData() {
-        let savings = AccountSummaryCell.ViewModel(accountType: .Banking,
+        let savings = AccountSummaryCellViewModel(accountType: .Banking,
                                                             accountName: "Basic Savings",
                                                         balance: 929466.23)
-        let chequing = AccountSummaryCell.ViewModel(accountType: .Banking,
+        let chequing = AccountSummaryCellViewModel(accountType: .Banking,
                                                     accountName: "No-Fee All-In Chequing",
                                                     balance: 17562.44)
-        let visa = AccountSummaryCell.ViewModel(accountType: .CreditCard,
+        let visa = AccountSummaryCellViewModel(accountType: .CreditCard,
                                                        accountName: "Visa Avion Card",
                                                        balance: 412.83)
-        let masterCard = AccountSummaryCell.ViewModel(accountType: .CreditCard,
+        let masterCard = AccountSummaryCellViewModel(accountType: .CreditCard,
                                                        accountName: "Student Mastercard",
                                                        balance: 50.83)
-        let investment1 = AccountSummaryCell.ViewModel(accountType: .Investment,
+        let investment1 = AccountSummaryCellViewModel(accountType: .Investment,
                                                        accountName: "Tax-Free Saver",
                                                        balance: 2000.00)
-        let investment2 = AccountSummaryCell.ViewModel(accountType: .Investment,
+        let investment2 = AccountSummaryCellViewModel(accountType: .Investment,
                                                        accountName: "Growth Fund",
                                                        balance: 15000.00)
 
@@ -98,7 +98,7 @@ extension AccountSummaryViewController: UITableViewDataSource {
         guard !accounts.isEmpty else { return UITableViewCell()}
         let cell = tableView.dequeueReusableCell(withIdentifier: AccountSummaryCell.reuseID, for: indexPath) as! AccountSummaryCell
         let account = accounts[indexPath.row]
-        cell.configure(with: account)
+        cell.configure(with: account, for: cell)
         return cell
     }
     
