@@ -46,7 +46,7 @@ class LoginViewController: UIViewController {
         style()
         layout()
         //MARK: - To Be Deleted
-//        loginView.usernameTextField.text = "A"
+        loginView.usernameTextField.text = "A"
         loginView.passwordTextField.text = "b"
     }
     override func viewDidAppear(_ animated: Bool) {
