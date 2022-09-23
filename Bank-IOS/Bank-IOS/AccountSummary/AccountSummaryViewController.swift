@@ -31,7 +31,6 @@ class AccountSummaryViewController: UIViewController {
 extension AccountSummaryViewController {
     private func setup() {
         setupTableView()
-        setupTableHeaderView()
         fetchData()
     }
     
@@ -55,15 +54,7 @@ extension AccountSummaryViewController {
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
-    private func setupTableHeaderView() {
-        let header = AccountSummaryHeaderView(frame: CGRect.zero) // intialize header with no inital size
-        
-        var size = header.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize) // layout the view in smallest way it can (height)
-        size.width = UIScreen.main.bounds.width //change the width by particular phone we using
-        header.frame.size = size
-        
-        tableView.tableHeaderView = header
-    }
+    
     private func fetchData() {
         let savings = AccountSummaryCellViewModel(accountType: .Banking,
                                                             accountName: "Basic Savings",
@@ -110,6 +101,12 @@ extension AccountSummaryViewController: UITableViewDataSource {
 extension AccountSummaryViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return AccountSummaryHeaderView()
+    }
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 144
     }
 }
 //MARK: - Actions
