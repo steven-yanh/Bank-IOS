@@ -45,6 +45,7 @@ extension ShakeyBellView {
         buttonView.layer.cornerRadius = buttonHeight/2
         buttonView.titleLabel?.font = UIFont.systemFont(ofSize: 13)
         buttonView.setTitle("9", for: .normal)
+        buttonView.addTarget(self, action: #selector(imageViewTapped), for: .primaryActionTriggered)
         buttonView.setTitleColor(.white, for: .normal)
     }
     func layout() {
