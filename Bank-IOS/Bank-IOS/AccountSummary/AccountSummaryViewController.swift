@@ -29,17 +29,15 @@ class AccountSummaryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        setupNavigationBar()
     }
-    func setupNavigationBar() {
-        navigationItem.rightBarButtonItem = logoutBarButtonItem
-    }
+    
 }
 //MARK: - prepare tabel
 extension AccountSummaryViewController {
     private func setup() {
         setupTableView()
-        fetchProfileAndLoadViews()
+        fetchData()
+        setupNavigationBar()
     }
     
     private func setupTableView() {
@@ -52,8 +50,8 @@ extension AccountSummaryViewController {
         tableView.rowHeight = AccountSummaryCell.rowHeight
         tableView.tableFooterView = UIView()
         
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -63,6 +61,40 @@ extension AccountSummaryViewController {
         ])
     }
     
+    private func fetchData() {
+        let group = DispatchGroup()
+        //Profile fetching
+        group.enter()
+        ProfileManager().fetchProfile(forUserid: "1") { result in
+            switch result {
+            case .success(let profile):
+                self.profile = profile
+                self.configureTableHeaderView(with: profile)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+            group.leave()
+        }
+        group.enter()
+        //Accounts fetching
+        AccountManager().fetchAccounts(forUserId: "1") { result in
+            switch result {
+            case .success(let accounts):
+                self.accounts = accounts
+                self.configureTabelCellView(with: accounts)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+            group.leave()
+        }
+        group.notify(queue: .main) {
+            self.tableView.reloadData()
+        }
+    }
+    
+    func setupNavigationBar() {
+        navigationItem.rightBarButtonItem = logoutBarButtonItem
+    }
     
 }
 //MARK: - TableViewDatasouce
@@ -85,6 +117,10 @@ extension AccountSummaryViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let vm = AccountSummaryHeaderViewModel(welcomeMessage: "Good morning,",
+                                               name: profile?.firstName ?? "Steven",
+                                                    date: Date())
+        tabelViewHeader.configure(with: vm)
         return tabelViewHeader
     }
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -99,45 +135,23 @@ extension AccountSummaryViewController {
 }
 // MARK: - Networking
 extension AccountSummaryViewController {
-    private func fetchProfileAndLoadViews() {
-        //Profile fetching
-        ProfileManager().fetchProfile(forUserid: "1") { result in
-            switch result {
-            case .success(let profile):
-                self.profile = profile
-                self.configureTableHeaderView(with: profile)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
-        //Accounts fetching
-        AccountManager().fetchAccounts(forUserId: "1") { result in
-            switch result {
-            case .success(let accounts):
-                self.accounts = accounts
-                self.configureTabelCellView(with: accounts)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
-    }
     private func configureTableHeaderView(with profile: Profile) {
-        let vm = AccountSummaryHeaderViewModel(welcomeMessage: "Good morning,",
-                                                    name: profile.firstName,
-                                                    date: Date())
-        DispatchQueue.main.async {
-            self.headerViewModel.configure(with: vm, for: self.tabelViewHeader)
-            self.tableView.reloadData()
+            let vm = AccountSummaryHeaderViewModel(welcomeMessage: "Good morning,",
+                                                        name: profile.firstName,
+                                                        date: Date())
+            DispatchQueue.main.async {
+                self.headerViewModel.configure(with: vm, for: self.tabelViewHeader)
+                self.tableView.reloadData()
 
+            }
         }
-    }
-    private func configureTabelCellView(with accounts: [Account]) {
-        accountCellViewModels = accounts.map {
-            AccountSummaryCellViewModel(accountType: $0.type, accountName: $0.name, balance: $0.amount)
-        }
+        private func configureTabelCellView(with accounts: [Account]) {
+            accountCellViewModels = accounts.map {
+                AccountSummaryCellViewModel(accountType: $0.type, accountName: $0.name, balance: $0.amount)
+            }
 
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
-    }
 }

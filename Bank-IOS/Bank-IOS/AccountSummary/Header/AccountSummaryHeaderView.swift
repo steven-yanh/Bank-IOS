@@ -107,3 +107,9 @@ class AccountSummaryHeaderView: UIView {
         
     }
 }
+//MARK: - ViewModel: update UI
+extension AccountSummaryHeaderView {
+    func configure(with vm: AccountSummaryHeaderViewModel) {
+        vm.configure(with: vm, for: self)
+    }
+}
