@@ -9,8 +9,16 @@ import UIKit
 
 class AccountSummaryViewController: UIViewController {
     
+    //Request model
+    var profile: Profile?
+    var accounts: [Account] = []
+    
+    //ViewModels
+    var accountCellViewModels = [AccountSummaryCellViewModel]()
+    var headerViewModel = AccountSummaryHeaderViewModel(welcomeMessage: "welcome", name: "Steven", date: Date())
+    
     var tableView = UITableView()
-    var accounts = [AccountSummaryCellViewModel]()
+    var tabelViewHeader = AccountSummaryHeaderView()
     
     var logoutBarButtonItem: UIBarButtonItem {
         let barButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logoutTapped))
@@ -31,7 +39,7 @@ class AccountSummaryViewController: UIViewController {
 extension AccountSummaryViewController {
     private func setup() {
         setupTableView()
-        fetchData()
+        fetchProfileAndLoadViews()
     }
     
     private func setupTableView() {
@@ -55,46 +63,20 @@ extension AccountSummaryViewController {
         ])
     }
     
-    private func fetchData() {
-        let savings = AccountSummaryCellViewModel(accountType: .Banking,
-                                                            accountName: "Basic Savings",
-                                                        balance: 929466.23)
-        let chequing = AccountSummaryCellViewModel(accountType: .Banking,
-                                                    accountName: "No-Fee All-In Chequing",
-                                                    balance: 17562.44)
-        let visa = AccountSummaryCellViewModel(accountType: .CreditCard,
-                                                       accountName: "Visa Avion Card",
-                                                       balance: 412.83)
-        let masterCard = AccountSummaryCellViewModel(accountType: .CreditCard,
-                                                       accountName: "Student Mastercard",
-                                                       balance: 50.83)
-        let investment1 = AccountSummaryCellViewModel(accountType: .Investment,
-                                                       accountName: "Tax-Free Saver",
-                                                       balance: 2000.00)
-        let investment2 = AccountSummaryCellViewModel(accountType: .Investment,
-                                                       accountName: "Growth Fund",
-                                                       balance: 15000.00)
-
-        accounts.append(savings)
-        accounts.append(chequing)
-        accounts.append(visa)
-        accounts.append(masterCard)
-        accounts.append(investment1)
-        accounts.append(investment2)
-    }
+    
 }
 //MARK: - TableViewDatasouce
 extension AccountSummaryViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard !accounts.isEmpty else { return UITableViewCell()}
+        guard !accountCellViewModels.isEmpty else { return UITableViewCell()}
         let cell = tableView.dequeueReusableCell(withIdentifier: AccountSummaryCell.reuseID, for: indexPath) as! AccountSummaryCell
-        let account = accounts[indexPath.row]
+        let account = accountCellViewModels[indexPath.row]
         cell.configure(with: account, for: cell)
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return accounts.count
+        return accountCellViewModels.count
     }
 }
 //MARK: - TableViewDelegate
@@ -103,7 +85,7 @@ extension AccountSummaryViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return AccountSummaryHeaderView()
+        return tabelViewHeader
     }
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 144
@@ -113,5 +95,49 @@ extension AccountSummaryViewController: UITableViewDelegate {
 extension AccountSummaryViewController {
     @objc func logoutTapped() {
         NotificationCenter.default.post(name: .logout, object: nil)
+    }
+}
+// MARK: - Networking
+extension AccountSummaryViewController {
+    private func fetchProfileAndLoadViews() {
+        //Profile fetching
+        ProfileManager().fetchProfile(forUserid: "1") { result in
+            switch result {
+            case .success(let profile):
+                self.profile = profile
+                self.configureTableHeaderView(with: profile)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+        //Accounts fetching
+        AccountManager().fetchAccounts(forUserId: "1") { result in
+            switch result {
+            case .success(let accounts):
+                self.accounts = accounts
+                self.configureTabelCellView(with: accounts)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+    private func configureTableHeaderView(with profile: Profile) {
+        let vm = AccountSummaryHeaderViewModel(welcomeMessage: "Good morning,",
+                                                    name: profile.firstName,
+                                                    date: Date())
+        DispatchQueue.main.async {
+            self.headerViewModel.configure(with: vm, for: self.tabelViewHeader)
+            self.tableView.reloadData()
+
+        }
+    }
+    private func configureTabelCellView(with accounts: [Account]) {
+        accountCellViewModels = accounts.map {
+            AccountSummaryCellViewModel(accountType: $0.type, accountName: $0.name, balance: $0.amount)
+        }
+
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
     }
 }

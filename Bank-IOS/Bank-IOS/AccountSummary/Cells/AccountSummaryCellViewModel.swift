@@ -7,11 +7,6 @@
 import Foundation
 struct AccountSummaryCellViewModel {
     
-    enum AccountType: String {
-        case Banking
-        case CreditCard
-        case Investment
-    }
     let accountType: AccountType
     let accountName: String
     let balance: Decimal
