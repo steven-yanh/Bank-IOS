@@ -17,6 +17,8 @@ class AccountSummaryViewController: UIViewController {
     var accountCellViewModels = [AccountSummaryCellViewModel]()
     var headerViewModel = AccountSummaryHeaderViewModel(welcomeMessage: "welcome", name: "Steven", date: Date())
     
+    //components
+    let refreshControl = UIRefreshControl()
     var tableView = UITableView()
     var tabelViewHeader = AccountSummaryHeaderView()
     
@@ -36,6 +38,7 @@ class AccountSummaryViewController: UIViewController {
 extension AccountSummaryViewController {
     private func setup() {
         setupTableView()
+        setupRefreshControl()
         fetchData()
         setupNavigationBar()
     }
@@ -59,6 +62,12 @@ extension AccountSummaryViewController {
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+    }
+    
+    private func setupRefreshControl() {
+        refreshControl.tintColor = appColor
+        refreshControl.addTarget(self, action: #selector(refreshContent), for: .valueChanged)
+        tableView.refreshControl = self.refreshControl
     }
     
     private func fetchData() {
@@ -89,6 +98,7 @@ extension AccountSummaryViewController {
         }
         group.notify(queue: .main) {
             self.tableView.reloadData()
+            self.tableView.refreshControl?.endRefreshing()
         }
     }
     
@@ -129,9 +139,15 @@ extension AccountSummaryViewController: UITableViewDelegate {
 }
 //MARK: - Actions
 extension AccountSummaryViewController {
+    
     @objc func logoutTapped() {
         NotificationCenter.default.post(name: .logout, object: nil)
     }
+    
+    @objc func refreshContent() {
+        fetchData()
+    }
+    
 }
 // MARK: - Networking
 extension AccountSummaryViewController {

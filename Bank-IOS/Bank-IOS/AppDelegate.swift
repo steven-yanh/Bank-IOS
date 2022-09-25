@@ -33,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         displayLogin() //Same?
         return true
     }
+    // Observer pattern: Achieved by NotificationCenter
     private func registerFornotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(didLogout), name: .logout, object: nil)
     }
