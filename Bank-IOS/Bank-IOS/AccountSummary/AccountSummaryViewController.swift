@@ -21,6 +21,7 @@ class AccountSummaryViewController: UIViewController {
     let refreshControl = UIRefreshControl()
     var tableView = UITableView()
     var tabelViewHeader = AccountSummaryHeaderView()
+    var isloaded = false
     
     var logoutBarButtonItem: UIBarButtonItem {
         let barButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logoutTapped))
@@ -39,6 +40,7 @@ extension AccountSummaryViewController {
     private func setup() {
         setupTableView()
         setupRefreshControl()
+        setupSkeletons()
         fetchData()
         setupNavigationBar()
     }
@@ -50,6 +52,7 @@ extension AccountSummaryViewController {
         tableView.dataSource = self
         
         tableView.register(AccountSummaryCell.self, forCellReuseIdentifier: AccountSummaryCell.reuseID)
+        tableView.register(SkeletonCell.self, forCellReuseIdentifier: SkeletonCell.reuseID)
         tableView.rowHeight = AccountSummaryCell.rowHeight
         tableView.tableFooterView = UIView()
         
@@ -69,6 +72,11 @@ extension AccountSummaryViewController {
         refreshControl.addTarget(self, action: #selector(refreshContent), for: .valueChanged)
         tableView.refreshControl = self.refreshControl
     }
+    private func setupSkeletons() {
+        let skeleton = Account.makeSkeleton()
+        accounts = Array.init(repeating: skeleton, count: 10)
+        configureTabelCellView(with: accounts)
+    }
     
     private func fetchData() {
         let group = DispatchGroup()
@@ -78,7 +86,6 @@ extension AccountSummaryViewController {
             switch result {
             case .success(let profile):
                 self.profile = profile
-                self.configureTableHeaderView(with: profile)
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -90,15 +97,19 @@ extension AccountSummaryViewController {
             switch result {
             case .success(let accounts):
                 self.accounts = accounts
-                self.configureTabelCellView(with: accounts)
             case .failure(let error):
                 print(error.localizedDescription)
             }
             group.leave()
         }
         group.notify(queue: .main) {
-            self.tableView.reloadData()
             self.tableView.refreshControl?.endRefreshing()
+            
+            guard let profile = self.profile else { return }
+            self.isloaded = true
+            self.configureTableHeaderView(with: profile)
+            self.configureTabelCellView(with: self.accounts)
+            self.tableView.reloadData()
         }
     }
     
@@ -111,9 +122,14 @@ extension AccountSummaryViewController {
 extension AccountSummaryViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard !accountCellViewModels.isEmpty else { return UITableViewCell()}
-        let cell = tableView.dequeueReusableCell(withIdentifier: AccountSummaryCell.reuseID, for: indexPath) as! AccountSummaryCell
-        let account = accountCellViewModels[indexPath.row]
-        cell.configure(with: account, for: cell)
+        
+        if isloaded {
+            let cell = tableView.dequeueReusableCell(withIdentifier: AccountSummaryCell.reuseID, for: indexPath) as! AccountSummaryCell
+            let account = accountCellViewModels[indexPath.row]
+            cell.configure(with: account, for: cell)
+            return cell
+        }
+        let cell = tableView.dequeueReusableCell(withIdentifier: SkeletonCell.reuseID, for: indexPath) as! SkeletonCell
         return cell
     }
     
@@ -145,7 +161,15 @@ extension AccountSummaryViewController {
     }
     
     @objc func refreshContent() {
+        reset()
+        setupSkeletons()
+        tableView.reloadData()
         fetchData()
+    }
+    private func reset() {
+        profile = nil
+        accounts = []
+        isloaded = false
     }
     
 }

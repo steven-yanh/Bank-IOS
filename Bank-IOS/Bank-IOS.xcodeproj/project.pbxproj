@@ -35,6 +35,8 @@
 		3BA847EC28DECDC10076DDF4 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA847EB28DECDC10076DDF4 /* Account.swift */; };
 		3BA847F228DF80710076DDF4 /* ProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA847F128DF80710076DDF4 /* ProfileTests.swift */; };
 		3BA847F428DF815E0076DDF4 /* AccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA847F328DF815E0076DDF4 /* AccountTests.swift */; };
+		3BA847F628E1470A0076DDF4 /* SkeletonLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA847F528E1470A0076DDF4 /* SkeletonLoadable.swift */; };
+		3BA847F828E148C20076DDF4 /* SkeletonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA847F728E148C20076DDF4 /* SkeletonCell.swift */; };
 		3BEDEB0D28DA31A600933CEA /* ShakeyBellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEDEB0C28DA31A600933CEA /* ShakeyBellView.swift */; };
 /* End PBXBuildFile section */
 
@@ -80,6 +82,8 @@
 		3BA847EB28DECDC10076DDF4 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		3BA847F128DF80710076DDF4 /* ProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTests.swift; sourceTree = "<group>"; };
 		3BA847F328DF815E0076DDF4 /* AccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTests.swift; sourceTree = "<group>"; };
+		3BA847F528E1470A0076DDF4 /* SkeletonLoadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonLoadable.swift; sourceTree = "<group>"; };
+		3BA847F728E148C20076DDF4 /* SkeletonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonCell.swift; sourceTree = "<group>"; };
 		3BEDEB0C28DA31A600933CEA /* ShakeyBellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeyBellView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -169,6 +173,8 @@
 			children = (
 				3B1EBAD528D414910079F77F /* AccountSummaryCell.swift */,
 				3B567A6228DCD9F00066A967 /* AccountSummaryCellViewModel.swift */,
+				3BA847F528E1470A0076DDF4 /* SkeletonLoadable.swift */,
+				3BA847F728E148C20076DDF4 /* SkeletonCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -362,6 +368,7 @@
 				3B5AC54328DD73C300BD058C /* Profile.swift in Sources */,
 				3B2BC36528D2546700A67346 /* AccountSummaryHeaderView.swift in Sources */,
 				3B33986928D696C40000D337 /* UITextField+SecureToggle.swift in Sources */,
+				3BA847F828E148C20076DDF4 /* SkeletonCell.swift in Sources */,
 				3B3CAE7628CBD6AA00790699 /* DummyVC.swift in Sources */,
 				3B55091C28D4FC63006424DA /* CurrencyFormatter.swift in Sources */,
 				3B1EBADA28D4FB880079F77F /* Decimal+Utils.swift in Sources */,
@@ -370,6 +377,7 @@
 				3BEDEB0D28DA31A600933CEA /* ShakeyBellView.swift in Sources */,
 				3B1EBAD628D414910079F77F /* AccountSummaryCell.swift in Sources */,
 				3B3CAE7428C970E200790699 /* OnboardingViewController.swift in Sources */,
+				3BA847F628E1470A0076DDF4 /* SkeletonLoadable.swift in Sources */,
 				3B5AC53E28DD706400BD058C /* AccountSummaryHeaderViewModel.swift in Sources */,
 				3B3139A528CD03CD000CD86F /* MainViewController.swift in Sources */,
 				3B2BC36228CDA42800A67346 /* AccountSummaryViewController.swift in Sources */,

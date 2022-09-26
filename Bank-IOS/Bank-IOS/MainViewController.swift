@@ -33,7 +33,7 @@ class MainViewController: UITabBarController {
         
         let tabBarList = [summaryNC, moneyNC, moreNC]
 
-        viewControllers = tabBarList
+        self.viewControllers = tabBarList
     }
     
     private func hideNavigationBarLine(_ navigationBar: UINavigationBar) {
