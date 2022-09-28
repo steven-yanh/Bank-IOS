@@ -87,7 +87,7 @@ extension AccountSummaryViewController {
             case .success(let profile):
                 self.profile = profile
             case .failure(let error):
-                print(error.localizedDescription)
+                self.displayError(error: error)
             }
             group.leave()
         }
@@ -98,14 +98,15 @@ extension AccountSummaryViewController {
             case .success(let accounts):
                 self.accounts = accounts
             case .failure(let error):
-                print(error.localizedDescription)
+                self.displayError(error: error)
             }
             group.leave()
         }
         group.notify(queue: .main) {
             self.tableView.refreshControl?.endRefreshing()
+            guard let profile = self.profile else { return } //guard let makes it very useful when fetch profile fails, it make sures the following statment does NOT trigger AND should not trigger!
             
-            guard let profile = self.profile else { return }
+            
             self.isloaded = true
             self.configureTableHeaderView(with: profile)
             self.configureTabelCellView(with: self.accounts)
@@ -145,7 +146,7 @@ extension AccountSummaryViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let vm = AccountSummaryHeaderViewModel(welcomeMessage: "Good morning,",
                                                name: profile?.firstName ?? "Steven",
-                                                    date: Date())
+                                               date: Date())
         tabelViewHeader.configure(with: vm)
         return tabelViewHeader
     }
@@ -171,27 +172,48 @@ extension AccountSummaryViewController {
         accounts = []
         isloaded = false
     }
-    
 }
 // MARK: - Networking
 extension AccountSummaryViewController {
     private func configureTableHeaderView(with profile: Profile) {
-            let vm = AccountSummaryHeaderViewModel(welcomeMessage: "Good morning,",
-                                                        name: profile.firstName,
-                                                        date: Date())
-            DispatchQueue.main.async {
-                self.headerViewModel.configure(with: vm, for: self.tabelViewHeader)
-                self.tableView.reloadData()
-
-            }
+        let vm = AccountSummaryHeaderViewModel(welcomeMessage: "Good morning,",
+                                               name: profile.firstName,
+                                               date: Date())
+        DispatchQueue.main.async {
+            self.headerViewModel.configure(with: vm, for: self.tabelViewHeader)
+            self.tableView.reloadData()
         }
-        private func configureTabelCellView(with accounts: [Account]) {
-            accountCellViewModels = accounts.map {
-                AccountSummaryCellViewModel(accountType: $0.type, accountName: $0.name, balance: $0.amount)
-            }
-
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
+    }
+    private func configureTabelCellView(with accounts: [Account]) {
+        accountCellViewModels = accounts.map {
+            return  AccountSummaryCellViewModel(accountType: $0.type, accountName: $0.name, balance: $0.amount)
         }
+        
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
+    }
+}
+//MARK: - Error handling
+extension AccountSummaryViewController {
+    private func displayError(error: NetworkError) {
+        let title: String
+        let message: String
+        switch error {
+        case .serverError:
+            title = "Server Error"
+            message = "Ensure you are connected to the internet. Please try again."
+        case .decodeError:
+            title = "Decoding Error"
+            message = "We could not process your request. Please try again."
+        }
+        self.showAlert(title: title, message: message)
+    }
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: "No network connection was detected", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Cancel", style: .cancel)
+        alert.addAction(action)
+        present(alert,animated: true)
+        
+    }
 }
