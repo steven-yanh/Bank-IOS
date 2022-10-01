@@ -22,7 +22,15 @@ class AccountSummaryViewController: UIViewController {
     var tableView = UITableView()
     var tabelViewHeader = AccountSummaryHeaderView()
     var isloaded = false
+    lazy var alert: UIAlertController = {
+        let alert = UIAlertController(title: "", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "OK", style: .default)
+        alert.addAction(action)
+        return alert
+    }()
     
+    //Network
+    var profileManager: ProfileManageable = ProfileManager() //must declare as protocol becuase this is the mock and real shares the same
     var logoutBarButtonItem: UIBarButtonItem {
         let barButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logoutTapped))
         barButtonItem.tintColor = .label
@@ -77,43 +85,53 @@ extension AccountSummaryViewController {
         accounts = Array.init(repeating: skeleton, count: 10)
         configureTabelCellView(with: accounts)
     }
-    
+    //MARK: - fetchData and Networking
     private func fetchData() {
         let group = DispatchGroup()
         //Profile fetching
+        fetchProfile(group: group, userId: "1")
+        //Accounts fetching
+        fetchAccounts(group: group, userId: "1")
+        group.notify(queue: .main) {
+            self.reloadView()
+        }
+        
+    }
+    private func fetchProfile(group: DispatchGroup, userId: String) {
         group.enter()
-        ProfileManager().fetchProfile(forUserid: "1") { result in
+        profileManager.fetchProfile(forUserId: userId) { result in
             switch result {
             case .success(let profile):
                 self.profile = profile
             case .failure(let error):
-                self.displayError(error: error)
+                self.displayError(error)
             }
             group.leave()
         }
+    }
+    
+    private func fetchAccounts(group: DispatchGroup, userId: String) {
         group.enter()
-        //Accounts fetching
-        AccountManager().fetchAccounts(forUserId: "1") { result in
+        AccountManager().fetchAccounts(forUserId: userId) { result in
             switch result {
             case .success(let accounts):
                 self.accounts = accounts
             case .failure(let error):
-                self.displayError(error: error)
+                self.displayError(error)
             }
             group.leave()
         }
-        group.notify(queue: .main) {
-            self.tableView.refreshControl?.endRefreshing()
-            guard let profile = self.profile else { return } //guard let makes it very useful when fetch profile fails, it make sures the following statment does NOT trigger AND should not trigger!
-            
-            
-            self.isloaded = true
-            self.configureTableHeaderView(with: profile)
-            self.configureTabelCellView(with: self.accounts)
-            self.tableView.reloadData()
-        }
     }
-    
+    private func reloadView() {
+        self.tableView.refreshControl?.endRefreshing()
+        
+        guard let profile = self.profile else { return } //guard let makes it very useful when fetch profile fails, it make sures the following statment does NOT trigger AND should not trigger!
+        
+        self.isloaded = true
+        self.configureTableHeaderView(with: profile)
+        self.configureTabelCellView(with: self.accounts)
+        self.tableView.reloadData()
+    }
     func setupNavigationBar() {
         navigationItem.rightBarButtonItem = logoutBarButtonItem
     }
@@ -196,24 +214,37 @@ extension AccountSummaryViewController {
 }
 //MARK: - Error handling
 extension AccountSummaryViewController {
-    private func displayError(error: NetworkError) {
+    private func displayError(_ error: NetworkError) {
+        let titleAndMessage = titleAndMessage(for: error)
+        self.showAlert(title: titleAndMessage.0, message: titleAndMessage.1)
+    }
+
+    private func titleAndMessage(for error: NetworkError) -> (String, String) {
         let title: String
         let message: String
         switch error {
         case .serverError:
             title = "Server Error"
-            message = "Ensure you are connected to the internet. Please try again."
-        case .decodeError:
-            title = "Decoding Error"
             message = "We could not process your request. Please try again."
+        case .decodeError:
+            title = "Network Error"
+            message = "Ensure you are connected to the internet. Please try again."
         }
-        self.showAlert(title: title, message: message)
+        return (title, message)
     }
     private func showAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: "No network connection was detected", preferredStyle: .alert)
-        let action = UIAlertAction(title: "Cancel", style: .cancel)
-        alert.addAction(action)
+        alert.title = title
+        alert.message = message
         present(alert,animated: true)
         
+    }
+}
+// MARK: Unit testing
+extension AccountSummaryViewController {
+    func titleAndMessageForTesting(for error: NetworkError) -> (String, String) {
+            return titleAndMessage(for: error)
+    }
+    func forceFetchProfile() {
+        fetchProfile(group: DispatchGroup(), userId: "1")
     }
 }
