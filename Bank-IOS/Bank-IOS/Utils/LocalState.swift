@@ -18,7 +18,6 @@ public class LocalState {
         }
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.hasOnboarded.rawValue)
-            
         }
     }
 }
